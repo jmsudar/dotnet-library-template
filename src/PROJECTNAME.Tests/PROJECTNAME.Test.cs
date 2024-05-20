@@ -2,7 +2,7 @@
 /// Placeholder summary
 /// </summary>
 [TestClass]
-public class JsonMethodsTests
+public class MethodsTest
 {
 
   //Disable at the beginning of testing
