@@ -8,16 +8,24 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
+# Statically set the version as it's unlikely to change frequently
+VERSION="net6.0"
+
+# Set license that will be included in properties file
+LICENSE=GPL-3.0-or-later
+
 PROJECT_NAME="$1"
+AUTHOR="$2"
+REPO_URL="$3"
 
 # Fetch the remote repository URL from 'origin'
-REPO_URL=$(git remote get-url origin)
+#REPO_URL=$(git remote get-url origin)
 
 # Check if the URL is retrieved successfully
-if [ -z "$REPO_URL" ]; then
-  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
-  exit 1
-fi
+#if [ -z "$REPO_URL" ]; then
+#  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
+#  exit 1
+#fi
 
 # Format the namespace: replace dashes with dots and convert to lowercase if necessary
 NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print $NF}').$(echo "$REPO_URL" | awk -F'/' '{print $NF}' | sed 's/\.git$//')"
@@ -25,7 +33,7 @@ NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print 
 echo "Replacing REPONAME with $NAMESPACE"
 
 # Replace REPONAME in files
-find . -type f -not -path "./.git/*" -exec sed -i "s/REPONAME/$NAMESPACE/g" {} +
+find . -type f -not -path "./.git/*" -exec sed -i '' "s/REPONAME/$NAMESPACE/g" {} +
 
 echo "Renaming directories and files"
 
@@ -41,12 +49,55 @@ echo "Initializiing .NET solution and project files"
 dotnet new sln -n "$PROJECT_NAME"
 
 # Create the source project
-dotnet new classlib -n "$PROJECT_NAME" -o "src/$PROJECT_NAME"
+dotnet new classlib -n "$PROJECT_NAME" -o "src/$PROJECT_NAME" --framework $VERSION
 dotnet sln "$PROJECT_NAME".sln add "src/$PROJECT_NAME/$PROJECT_NAME".csproj
 
 # Create the test project
-dotnet new mstest -n "${PROJECT_NAME}.Tests" -o "tests/${PROJECT_NAME}.Tests"
-dotnet sln "$PROJECT_NAME".sln add "tests/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
+dotnet new mstest -n "${PROJECT_NAME}.Tests" -o "src/${PROJECT_NAME}.Tests" --framework $VERSION
+dotnet sln "$PROJECT_NAME".sln add "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
+
+echo "Adding additional fields to project files"
+
+# Populate property values used by NuGet publish
+sed -i '' "/<\/PropertyGroup>/i \\
+    <PackageId>$NAMESPACE<\/PackageId>\\
+    <Version>1.0.0<\/Version>\\
+    <Authors>$AUTHOR<\/Authors>\\
+    <Description>PLACEHOLDER<\/Description>\\
+    <PackageTags>PLACEHOLDER<\/PackageTags>\\
+    <RepositoryUrl>$REPO_URL<\/RepositoryUrl>\\
+    <PackageLicenseExpression>$LICENSE<\/PackageLicenseExpression>\\
+    <PackageProjectUrl>$REPO_URL<\/PackageProjectUrl>\\
+    <PackageReadmeFile>README.md<\/PackageReadmeFile>\\
+" "src/${PROJECT_NAME}/${PROJECT_NAME}.csproj"
+
+# Add the README to your project properties file
+sed -i '' "/<\/Project>/i \\
+  <ItemGroup>\\
+    <None Include=\"..\/..\/README.md\" Pack=\"true\" PackagePath=\"\/\" \/>\\
+  <\/ItemGroup>\\
+  \\
+" "src/${PROJECT_NAME}/${PROJECT_NAME}.csproj"
+
+# Add newly created method class as covered in the test project file
+sed -i '' "/<\/Project>/i \\
+  <ItemGroup>\\
+    <ProjectReference Include=\"..\/${PROJECT_NAME}\/${PROJECT_NAME}.csproj\" \/>\\
+  <\/ItemGroup>\\
+  \\
+" "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
+
+echo "Cleaning up unneeded files and dependencies"
+
+# Removes coverlet.collector third party dependency
+sed -i '' '/coverlet.collector/d' "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
+
+# Removing auto-generated class file
+rm "src/$PROJECT_NAME/Class1.cs"
+
+# Removing auto-generated test class files
+rm "src/${PROJECT_NAME}.Tests/UnitTest1.cs"
+rm "src/${PROJECT_NAME}.Tests/Usings.cs"
 
 echo "Deleting initialization script"
 
