@@ -1,3 +1,5 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 /// <summary>
 /// Placeholder summary
 /// </summary>
