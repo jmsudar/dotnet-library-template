@@ -16,17 +16,29 @@ To use this repo, create a repo in GitHub selecting this as your template. Clone
 The initialization script will run, then delete itself, leaving you with a clean repository with the following structure:
 
 .
+
 |_.github/workflows
+
 |__create-release.yaml
+
 |_src
+
 |__project-name
+
 |___project-name.cs
+
 |___project-name.csproj
+
 |__project-name.Tests
+
 |___project-name.Test.cs
+
 |___project-name.Test.csproj
+
 |_.gitignore
+
 |_LICENSE
+
 |_project-name.sln
 
 You then simply need to write your class and unit tests, provision your GitHub secrets, and check your work back in. The PR and merge-hook GitHub actions will run, leaving you with an easy to work and publish project that auto-publishes to nuget!
