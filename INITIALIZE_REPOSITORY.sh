@@ -16,23 +16,24 @@ LICENSE=GPL-3.0-or-later
 
 PROJECT_NAME="$1"
 AUTHOR="$2"
+REPO_URL="$3"
 
 # Fetch the remote repository URL from 'origin'
-REPO_URL=$(git remote get-url origin)
+#REPO_URL=$(git remote get-url origin)
 
 # Check if the URL is retrieved successfully
-if [ -z "$REPO_URL" ]; then
-  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
-  exit 1
-fi
+#if [ -z "$REPO_URL" ]; then
+#  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
+#  exit 1
+#fi
 
 # Format the namespace: replace dashes with dots and convert to lowercase if necessary
 NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print $NF}').$(echo "$REPO_URL" | awk -F'/' '{print $NF}' | sed 's/\.git$//')"
 
-echo "Replacing REPONAME with $NAMESPACE"
+echo "Replacing NAMESPACE with $NAMESPACE"
 
 # Replace REPONAME in files
-find . -type f -not -path "./.git/*" -exec sed -i '' "s/REPONAME/$NAMESPACE/g" {} +
+find . -type f -not -path "./.git/*" -exec sed -i '' "s/NAMESPACE/$NAMESPACE/g" {} +
 
 echo "Renaming directories and files"
 
@@ -86,7 +87,10 @@ sed -i '' "/<\/Project>/i \\
   \\
 " "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
 
-echo "Cleaning up unneeded files and dependencies"
+echo "Cleaning up files and dependencies"
+
+# Replace NAMESPACE with your project name
+sed -i '' "s/NAMESPACE/$NAMESPACE/g" "src/${PROJECT_NAME}/${PROJECT_NAME}.cs"
 
 # Removes coverlet.collector third party dependency
 sed -i '' '/coverlet.collector/d' "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
