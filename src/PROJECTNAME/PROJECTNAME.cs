@@ -1,18 +1,16 @@
-namespace REPONAME
+namespace jmsudar.DotNet.Test
 {
-  /// <summary>
-  /// Summary placeholder
-  /// </summary>  
-  public static class Methods
-  {
     /// <summary>
     /// Summary placeholder
-    /// </summary>
-    /// <param name="example">Example parameter</param>
-    /// <returns>Example return type</returns>
-    public static void Method()
+    /// </summary>  
+    public static class Methods
     {
-      
+        /// <summary>
+        /// Summary placeholder
+        /// </summary>
+        /// <param name="example">Example parameter</param>
+        /// <returns>Example return type</returns>
+        public static void Method()
+        { }
     }
-  }
 }
