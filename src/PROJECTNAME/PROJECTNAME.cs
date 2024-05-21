@@ -1,4 +1,4 @@
-namespace jmsudar.DotNet.Test
+namespace NAMESPACE
 {
     /// <summary>
     /// Summary placeholder
