@@ -16,7 +16,8 @@ jobs:
         tags: true
 
     - name: Check for Tags
-      id: check_tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         if [ $(git tag | wc -l) -eq 0 ]; then
           echo "No tags found, setting initial tag to v1.0.0"
