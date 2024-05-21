@@ -16,16 +16,15 @@ LICENSE=GPL-3.0-or-later
 
 PROJECT_NAME="$1"
 AUTHOR="$2"
-REPO_URL="$3"
 
 # Fetch the remote repository URL from 'origin'
-#REPO_URL=$(git remote get-url origin)
+REPO_URL=$(git remote get-url origin)
 
 # Check if the URL is retrieved successfully
-#if [ -z "$REPO_URL" ]; then
-#  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
-#  exit 1
-#fi
+if [ -z "$REPO_URL" ]; then
+  echo "Error: Failed to retrieve repository URL from Git. Make sure you're in a Git repository and the 'origin' remote is set."
+  exit 1
+fi
 
 # Format the namespace: replace dashes with dots and convert to lowercase if necessary
 NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print $NF}').$(echo "$REPO_URL" | awk -F'/' '{print $NF}' | sed 's/\.git$//')"
