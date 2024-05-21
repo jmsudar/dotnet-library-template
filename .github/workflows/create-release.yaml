@@ -15,6 +15,16 @@ jobs:
       with:
         tags: true
 
+    - name: Check for Tags
+      id: check_tags
+      run: |
+        if [ $(git tag | wc -l) -eq 0 ]; then
+          echo "No tags found, setting initial tag to v1.0.0"
+          git tag v1.0.0
+          git push --tags
+          echo "tag_setup=true" >> ${GITHUB_OUTPUT}
+        fi
+
     - name: Generate Changelog
       id: changelog
       uses: mikepenz/release-changelog-builder-action@v4.2.0
