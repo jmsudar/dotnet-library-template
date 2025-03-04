@@ -30,16 +30,17 @@ if [ -z "$REPO_URL" ]; then
   exit 1
 fi
 
+# Push the initial tag of v1.0.0 if the remote URL is valid
+git tag -a v1.0.0 -m "Initial commit"
+git push origin v1.0.0
+
 # Format the namespace: replace dashes with dots and convert to lowercase if necessary
 NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print $NF}').$(echo "$REPO_URL" | awk -F'/' '{print $NF}' | sed 's/\.git$//')"
 
 echo "Generated namespace: $NAMESPACE"
 echo ""
-
-# Replace REPONAME in files
-find . -type f -not -path "./.git/*" -exec sed -i '' "s/NAMESPACE/$NAMESPACE/g" {} +
-
 echo "Renaming directories and files"
+echo ""
 
 # Optional: Rename files or directories if needed
 mv src/PROJECTNAME/PROJECTNAME.cs src/PROJECTNAME/"$PROJECT_NAME".cs
@@ -48,6 +49,7 @@ mv src/PROJECTNAME src/"$PROJECT_NAME"
 mv src/PROJECTNAME.Tests src/"$PROJECT_NAME".Tests
 
 echo "Initializing .NET solution and project files"
+echo ""
 
 # Create the main solution
 dotnet new sln -n "$PROJECT_NAME"
@@ -91,9 +93,28 @@ sed -i '' "/<\/Project>/i \\
   \\
 " "src/${PROJECT_NAME}.Tests/${PROJECT_NAME}.Tests.csproj"
 
+echo "Adding CI workflow"
+echo ""
+
+cat <<EOF > .github/workflows/dotnet-ci.yaml
+name: .NET Continuous Integration
+
+on:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run .NET CI Action
+        uses: jmsudar/dotnet-continuous-integration@main
+EOF
+
 echo "Cleaning up files and dependencies"
+echo ""
 
 echo "Replacing NAMESPACE with $NAMESPACE"
+echo ""
 
 # Replace NAMESPACE with your project name
 sed -i '' "s/NAMESPACE/$NAMESPACE/g" "src/${PROJECT_NAME}/${PROJECT_NAME}.cs"
@@ -109,6 +130,7 @@ rm "src/${PROJECT_NAME}.Tests/UnitTest1.cs"
 rm "src/${PROJECT_NAME}.Tests/Usings.cs"
 
 echo "Deleting initialization script"
+echo ""
 
 # Self-delete the script
 rm -- "$0"
