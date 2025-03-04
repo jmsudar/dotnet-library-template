@@ -30,6 +30,10 @@ if [ -z "$REPO_URL" ]; then
   exit 1
 fi
 
+# Push the initial tag of v1.0.0 if the remote URL is valid
+git tag -a v1.0.0 -m "Initial commit"
+git push origin v1.0.0
+
 # Format the namespace: replace dashes with dots and convert to lowercase if necessary
 NAMESPACE="$(echo "$REPO_URL" | awk -F'/' '{print $(NF-1)}' | awk -F':' '{print $NF}').$(echo "$REPO_URL" | awk -F'/' '{print $NF}' | sed 's/\.git$//')"
 
